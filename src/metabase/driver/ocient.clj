@@ -1,7 +1,9 @@
 (ns metabase.driver.ocient
   "Metabase Ocient Driver."
   (:require [clojure
-             [set :as set]]
+             [set :as set]
+             [string :as str]
+             [core :as core]]
             [clojure.tools.logging :as log]
             [honeysql.core :as hsql]
             [honeysql.format :as hformat]
@@ -17,9 +19,10 @@
             [metabase.driver.sql.util.unprepare :as unprepare]
             [metabase.util
              [date-2 :as u.date]
+             [i18n :refer [trs tru]]
              [honeysql-extensions :as hx]])
 
-  (:import [java.sql PreparedStatement Types]
+  (:import [java.sql PreparedStatement Statement Types]
            [java.time LocalTime OffsetDateTime ZonedDateTime Instant OffsetTime ZoneId]
            [java.util Calendar TimeZone]))
 
@@ -141,6 +144,22 @@
   (defmethod driver/supports? [:ocient feature] [_ _] supported?))
 
 (def zone-id-utc "UTC Zone ID" (t/zone-id "UTC"))
+
+(defn- do-execute!
+  [driver ^Statement stmt ^String sql]
+  (if (.execute stmt sql)
+    (.getResultSet stmt)
+    (throw (ex-info (str (tru "Select statement did not produce a ResultSet for native query"))
+                    {:sql sql :driver driver}))))
+
+(defmethod sql-jdbc.execute/execute-statement! :ocient
+  [driver ^Statement stmt ^String sql]
+  ;; Strip trailing semicolons from the statement
+  (if (and (some? sql)
+           (->> (core/take-last 1 sql)
+                (contains? #{";" "⅋"})))
+    (do-execute! driver stmt (str/join "" (drop-last sql)))
+    (do-execute! driver stmt sql)))
 
 (defmethod sql-jdbc.execute/read-column-thunk [:ocient Types/TIMESTAMP]
   [_ rs _ i]
