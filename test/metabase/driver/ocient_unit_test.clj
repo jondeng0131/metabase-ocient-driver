@@ -21,7 +21,7 @@
 
 (deftest single-sign-on-connection-details-test
   (mt/test-driver :ocient
-                  (testing "Make sure the connection details "
+                  (testing "Make sure SSO connection details are marshaled corrected "
                     (is (= {:classname   "com.ocient.jdbc.JDBCDriver"
                             :subprotocol "ocient"
                             :sslmode     "disable"
