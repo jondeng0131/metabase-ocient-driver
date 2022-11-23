@@ -19,6 +19,25 @@
                                                                             :db                 "metabase"
                                                                             :additional-options "loglevel=DEBUG;logfile=jdbc_trace.out"}))))))
 
+(deftest single-sign-on-connection-details-test
+  (mt/test-driver :ocient
+                  (testing "Make sure the connection details "
+                    (is (= {:classname   "com.ocient.jdbc.JDBCDriver"
+                            :subprotocol "ocient"
+                            :sslmode     "disable"
+                            :statementPooling     "OFF"
+                            :force       "true"
+                            :subname     "//sales-sql0:4050/metabase"
+                            :handshake   "SSO"
+                            :user        "access_token"
+                            :password    "********"}
+                           (sql-jdbc.conn/connection-details->spec :ocient {:host               "sales-sql0"
+                                                                            :port               4050
+                                                                            :db                 "metabase"
+                                                                            :sso                true
+                                                                            :token-type         "access_token"
+                                                                            :token              "********"}))))))
+
 (deftest insert-rows-ddl-test
   (mt/test-driver :ocient
                   (testing "Make sure we're generating correct DDL for Ocient to insert all rows at once."

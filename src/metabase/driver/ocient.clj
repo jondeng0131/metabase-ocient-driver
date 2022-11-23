@@ -76,7 +76,7 @@
           {:handshake "SSO"
            :user (:token-type details-map)
            :password (:token details-map)}))
-      (dissoc :ssl :token-type :token)
+      (dissoc :ssl :token-type :token :sso)
       (set/rename-keys {:dbname :db})
       ocient
       ;; note: seperator style is misspelled in metabase core code
