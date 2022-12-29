@@ -1,0 +1,41 @@
+name: build-test-tarball
+run-name: Build test tarball on branch ${{ inputs.branch }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch: {required: true, type: string, description: Branch to build test tarball from}
+
+jobs:
+  build-tarball:
+    name: Build Metabase Test tarball
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code       # https://github.com/actions/checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ inputs.branch }}
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Maven cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('deps.edn') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Set up docker container to run test-tarball
+      
+      - name: Run test-tarball
+        run: make test-tarball
+      - name: Set env
+        run: echo "METABASE_TEST_VERSION=$(make test-tarball-version)" >> $GITHUB_ENV
+      - name: Upload test tarball as artifact
+        uses: actions/upload-artifact@v3 # https://github.com/actions/upload-artifact
+        with:
+          name: metabase_test_${{env.METABASE_TEST_VERSION}}
+          path: ./target/metabase_test_*.tar.gz
+          retention-days: 1
+
+#https://stackoverflow.com/questions/63362126/github-actions-how-to-run-a-workflow-created-on-a-non-master-branch-from-the-wo
