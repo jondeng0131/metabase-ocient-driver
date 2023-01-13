@@ -79,11 +79,11 @@
      :display-name (trs "The type of the Single Sign-On token")
      :type :select
      :options [{:name "access_token"
-                :value "access-token"}
+                :value "access_token"}
                {:name "id_token"
-                :value "id-token"}]
-     :default "access-token"
-     :placeholder "access-token"
+                :value "id_token"}]
+     :default "access_token"
+     :placeholder "access_token"
      :required false
      :visible-if {:authentication-method "sso"}}
     {:name "token"
@@ -146,13 +146,20 @@
      
 (defn handle-sso-properties
   "Marshal Single Sign-On connection peroperties"
-  [{:keys [sso token-type token]
-    :or {sso false, token-type "", token ""}
+  [{:keys [sso authentication-method token-type token]
+    :or {sso false, authentication-method "", token-type "", token ""}
     :as opts}]
-  (merge (when sso {:handshake "SSO"
-                    :user token-type
-                    :password token})
-         (dissoc opts :sso :token-type :token)))
+  (merge (when (or
+                sso
+                (and
+                 (some? authentication-method)
+                 (=
+                  (str/lower-case authentication-method)
+                  "sso")))
+           {:handshake "SSO"
+            :user token-type
+            :password token})
+         (dissoc opts :sso :token-type :token :authentication-method)))
 
 (defmethod sql-jdbc.conn/connection-details->spec :ocient [_ {_ :ssl, :as details-map}]
   (-> details-map
