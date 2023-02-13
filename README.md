@@ -30,6 +30,24 @@ If you already have a Metabase binary release (see [Metabase distribution page](
 - [Leiningen](https://leiningen.org/)
 - [Install metabase-core](https://github.com/metabase/metabase/wiki/Writing-a-Driver:-Packaging-a-Driver-&-Metabase-Plugin-Basics#installing-metabase-core-locally)
 
+### Connecting to Ocient
+To add a database connection, click on the gear icon in the top right, and navigate to Admin settings > Databases > Add a database.
+Enter the following fields in your connection settings: 
+-Display Name	(Display name for database)
+-Host	(The host name or IP address of the SQL node of your Ocient database.) 
+-Port	(The port number for your connection. Unless you have altered this, the default Ocient port is 4050)
+-Database name	(The name of the database you want to connect to)
+-Schemas	(The identifier for any schemas you want to use)
+-Authentication Method	(Choose between SSO and Password)
+-Username	(The username for your database)
+-Password	(The password associated with your username)
+-Type of SSO token	(access_token)
+-SSO token	(Your SSO access token string)
+
+*Note: To use SSO authentication, you must SSO integration enabled for the specified database and group. For more information, see ALTER DATABASE SET SSO INTEGRATION. 
+
+
+
 ### Build from source
 
 The Ocient driver, can be built using [`Clouure Tools`](https://clojure.org/releases/tools):
